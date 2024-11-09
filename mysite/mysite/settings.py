@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-import os
+from decouple import config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -21,10 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^=6-_k)oh!n9-fpcd1qd0rf(!8y2!!8cc*so1if(!*ydv@*_dc'
-
+SECRET_KEY = config("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = str(os.environ.get("DJANGO_DEBUG")).lower() == 'true'
+#DEBUG = str(os.environ.get("DJANGO_DEBUG")).lower() == 'true'
+DEBUG = config("DJANGO_DEBUG", cast=bool)
 print("debug", DEBUG)
 
 ALLOWED_HOSTS = [
@@ -34,7 +34,8 @@ ALLOWED_HOSTS = [
 if DEBUG:
     ALLOWED_HOSTS += [
         '127.0.0.1',
-        'localhost'
+        'localhost',
+        '9000-idx-saas-1730888886629.cluster-qtqwjj3wgzff6uxtk26wj7fzq6.cloudworkstations.dev'
     ]
 
 
@@ -84,12 +85,18 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_URL = config("DATABASE_URL", cast=str, default=30)
+CONN_MAX_AGE = config("CONN_MAX_AGE", cast=int)
+
+if DATABASE_URL is not None:
+    import dj_database_url 
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_health_checks=True,
+            conn_max_age=CONN_MAX_AGE,
+            )
     }
-}
 
 
 # Password validation
