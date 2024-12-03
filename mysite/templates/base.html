@@ -7,7 +7,7 @@
 </head>
 <body>
  {% include 'nav/navbar.html' %}
-  <h1>Hello World!</h1>
+ {% include 'base/messages.html' with messages=messages %}
 {% block content %}{% endblock %}  
 
   {% include 'base/js.html' %}

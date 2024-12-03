@@ -7,3 +7,8 @@ python-decouple
 psycopg[binary]
 dj-database-url
 requests
+whitenoise
+django-allauth[socialaccount]
+django-allauth-ui
+django-widget-tweaks
+slippers

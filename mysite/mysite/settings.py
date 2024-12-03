@@ -16,6 +16,29 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+#Email Config
+EMAIL_HOST=config("EMAIL_HOST", cast=str, default="smtp.gmail.com")
+EMAIL_PORT=config("EMAIL_PORT", cast=str, default='587')
+EMAIL_USE_TLS=config("EMAIL_USE_TLS", cast=bool, default=True)
+EMAIL_USE_SSL=config("EMAIL_USE_SSL", cast=bool, default=False)
+EMAIL_HOST_USER=config("EMAIL_HOST_USER", cast=str, default=None)
+EMAIL_HOST_PASSWORD=config("EMAIL_HOST_PASSWORD", cast=str, default=None)
+
+#500 errors
+ADMIN_USER_NAME=config("ADMIN_USER_NAME", default='Admin user')
+ADMIN_USER_EMAIL=config("ADMIN_USER_EMAIL", default=None)
+
+ADMINS=[]
+MANAGERS=ADMINS
+
+if all([ADMIN_USER_EMAIL, ADMIN_USER_NAME]):
+    # 500 error are emailed to these users
+    ADMINS +=[
+        (f'{ADMIN_USER_NAME}', f'{ADMIN_USER_EMAIL}')
+        ]
+    MANAGERS +=[
+        (f'{ADMIN_USER_NAME}', f'{ADMIN_USER_EMAIL}')
+    ]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -34,10 +57,12 @@ if DEBUG:
     ALLOWED_HOSTS += [
         '127.0.0.1',
         'localhost',
-        '9000-idx-saas-1730888886629.cluster-qtqwjj3wgzff6uxtk26wj7fzq6.cloudworkstations.dev'
+        'https://9000-idx-saas-1730888886629.cluster-qtqwjj3wgzff6uxtk26wj7fzq6.cloudworkstations.dev'
     ]
 
+CSRF_TRUSTED_ORIGINS = ['https://9000-idx-saas-1730888886629.cluster-qtqwjj3wgzff6uxtk26wj7fzq6.cloudworkstations.dev', 'https://8000-idx-saas-1730888886629.cluster-qtqwjj3wgzff6uxtk26wj7fzq6.cloudworkstations.dev']
 
+CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -49,24 +74,43 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'command',
     'visits',
+    # third party    
+    "allauth_ui",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.github",
+    "widget_tweaks",
+    "slippers",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    "github": {
+        "VERIFIED_EMAIL": True
+    }
+}
+
 
 ROOT_URLCONF = 'mysite.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
+        'DIRS': [BASE_DIR / "templates", ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -81,6 +125,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
+# DJANGO Allauth config
+LOGIN_REDIRECT_URL="/"
+ACCOUNT_AUTHENTICATION_METHOD="username_email"
+ACCOUNT_EMAIL_VERIFICATION="mandatory"
+ACCOUNT_EMAIL_SUBJECT_PREFIX="[Django-SaaS]"
+ACCOUNT_EMAIL_REQUIRED=True
+
+AUTHENTICATION_BACKENDS = [
+    #...
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+    #...
+]
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -147,8 +207,14 @@ STATICFILES_DIRS = [
 # output for collectstatic
 # local cdn
 STATIC_ROOT = BASE_DIR / "local-cdn"
+# < django 4.2
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
