@@ -65,6 +65,16 @@ CSRF_TRUSTED_ORIGINS = ['https://9000-idx-saas-1730888886629.cluster-qtqwjj3wgzf
 CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
+AUTHENTICATION_BACKENDS = [
+    #...
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+    #...
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -72,8 +82,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'command',
-    'visits',
+    #apps
+    "command",
+    "profiles",
+    "subscriptions",
+    "visits",
     # third party    
     "allauth_ui",
     "allauth",
@@ -81,7 +94,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.github",
     "widget_tweaks",
-    "slippers",
+    #"slippers",
 ]
 
 MIDDLEWARE = [
@@ -101,7 +114,7 @@ MIDDLEWARE = [
 SOCIALACCOUNT_PROVIDERS = {
     "github": {
         "VERIFIED_EMAIL": True
-    }
+    },
 }
 
 
@@ -132,15 +145,6 @@ ACCOUNT_EMAIL_VERIFICATION="mandatory"
 ACCOUNT_EMAIL_SUBJECT_PREFIX="[Django-SaaS]"
 ACCOUNT_EMAIL_REQUIRED=True
 
-AUTHENTICATION_BACKENDS = [
-    #...
-    # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
-
-    # `allauth` specific authentication methods, such as login by email
-    'allauth.account.auth_backends.AuthenticationBackend',
-    #...
-]
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
